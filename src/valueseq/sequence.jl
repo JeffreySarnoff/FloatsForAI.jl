@@ -31,32 +31,22 @@ function valueseq(x::AIFloat{T, :unsigned, Δ}) where {T, Δ}
     return values
 end
 
+
 #
 # SIGNED (finite or extended)
 #
 function valueseq(x::AIFloat{T, :signed, Δ}) where {T, Δ}
     # build the unsigned-like ladder first
-    stride = x.n_values ÷ 2^x.exp_bits
-
-    exponent_values   = exponents(x, stride)
-    fractional_values = fractionals(x)
-    implicit_bits     = implicits(x)
-
-    significand_values = fractional_values .+ implicit_bits
-    allpos = exponent_values .* significand_values
-
-    # signed layouts only use the first half as the positive side
-    # (your struct makes n_values the total encodings)
-    pos = allpos[1:end>>>1]
+    u = AIFloat(x.bitwidth, x.precision + 1, :unsigned, Δ; T=T)
+    poz = valueseq(u)[1:2:end]
 
     if Δ === :extended
-        # highest positive gets +Inf
-        pos[end] = T(Inf)
+        poz[end] = T(Inf)
     end
 
     # negatives are the positives except the first (to avoid -0)
-    neg = -one(T) .* pos[2:end]
+    neg = -one(T) .* poz[2:end]
 
     # signed layout: [+..., NaN, -...]
-    return vcat(pos, T(NaN), neg)
+    vcat(poz, T(NaN), neg)
 end
