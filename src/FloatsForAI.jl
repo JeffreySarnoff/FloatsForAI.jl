@@ -2,21 +2,17 @@ module FloatsForAI
 
 export AIFloat, valueseq
 
-cd(s"C:\Users\Custom PC\Documents\Presentations\CoNGA-2025\FloatsForAI.jl\src")
+# cd(s"C:\Users\Custom PC\Documents\Presentations\CoNGA-2025\FloatsForAI.jl\src")
 
 include("construct/struct.jl")
 include("construct/constructors.jl")
 include("construct/abstract.jl")
 include("construct/concrete.jl")
 
+include("valueseq/sequence.jl")
 include("valueseq/expseq.jl")
 include("valueseq/fracseq.jl")
 include("valueseq/intseq.jl")
-
-include("valueseq/ufvalueseq.jl")
-include("valueseq/uevalueseq.jl")
-include("valueseq/sfvalueseq.jl")
-include("valueseq/sevalueseq.jl")
 
 function code_seq(x::AIFloat)
     n = x.n_values
@@ -28,3 +24,4 @@ function code_seq(x::AIFloat)
 end
 
 end # module FloatsForAI
+
