@@ -19,9 +19,9 @@ function valueseq(x::AIFloat{T, :unsigned, Δ}) where {T, Δ}
     significand_values = fractional_values .+ implicit_bits
     values = exponent_values .* significand_values
 
-    values[end]   = T(NaN)
+    values[end] = T(NaN)
     if Δ === :extended
-        # next-to-last is +Inf, last is NaN
+        # next-to-last is +Inf
         values[end-1] = T(Inf)
     end
 
