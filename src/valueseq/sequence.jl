@@ -38,7 +38,7 @@ end
 function valueseq(x::AIFloat{T, :signed, Δ}) where {T, Δ}
     # build the unsigned-like ladder first
     u = AIFloat(x.bitwidth, x.precision + 1, :unsigned, Δ; T=T)
-    poz = valueseq(u)[1:2:end]
+    poz = FloatsForAI.valueseq(u)[1:2:end]
 
     if Δ === :extended
         poz[end] = T(Inf)
