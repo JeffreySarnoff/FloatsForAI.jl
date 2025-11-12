@@ -53,24 +53,21 @@ end
 #
 function valueseq(x::AIFloat{T, :signed, Δ}) where {T, Δ}
     # build the unsigned-like ladder first
-    u = AIFloat(x.bitwidth-1, x.precision, :unsigned, Δ; T=T)
+    u = AIFloat(x.bitwidth, x.precision+1, :unsigned, Δ; T)
     stride = u.n_values ÷ 2^u.exp_bits
-    # poz is positive or zero
-    poz = non_negative(u, stride)
+    # poz is positive or zero, does not index NaN
+    poz = non_negative(u, stride)[1:2:end]
     
-    # signed layouts only use the first half as the positive side
-    nonneg = poz[1:end>>>1]
-
     if Δ === :extended
         # highest positive gets +Inf
-        nonneg[end] = T(Inf)
+        poz[end] = T(Inf)
     end
 
     # negatives are the positives except the first (to avoid -0)
-    neg = -one(T) .* nonneg[2:end]
+    neg = -one(T) .* poz[2:end]
 
     # signed layout: [+..., NaN, -...]
-    return vcat(nonneg, T(NaN), neg)
+    return vcat(poz, T(NaN), neg)
 end
 
 function non_negative(x::AIFloat, stride)
