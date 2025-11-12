@@ -1,8 +1,8 @@
 # FloatsForAI.jl
-## IEEE P3109 compatible floating-point representations.
+### IEEE P3109 compatible floating-point representations.
 
-### &copy; 2025 by Jeffrey Sarnoff.  
-### Use under the MIT License, with attribution. See the file CITATION.cff.
+#### &copy; 2025 by Jeffrey Sarnoff.  
+#### Use under the MIT License, with attribution. See the file CITATION.cff.
 
 
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://JeffreySarnoff.github.io/FloatsForAI.jl/stable/)
