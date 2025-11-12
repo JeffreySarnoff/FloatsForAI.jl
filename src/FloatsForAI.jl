@@ -1,45 +1,30 @@
 module FloatsForAI
 
-export # abstract types
-         AbstractAIFloat, AbstractUnsignedFloat, AbstractSignedFloat,
-         AkoUnsignedFiniteFloat, AkoUnsignedExtendedFloat,
-         AkoSignedFiniteFloat, AkoSignedExtendedFloat,
-        # unions of abstract types
-         AbstractUnsignedFloats, AbstractSignedFloats,
-         AbstractFiniteFloats, AbstractExtendedFloats,
-         # parameterized unions of abstract types
-         AbstractUnsignedFloat, AbstractSignedFloat,
-         AbstractFiniteFloat, AbstractExtendedFloat,
-       # concrete types
-         UnsignedFiniteFloat, UnsignedExtendedFloat,
-         SignedFiniteFloat, SignedExtendedFloat,
-         # unions of concrete types
-         UnsignedFloats, SignedFloats,
-         FiniteFloats, ExtendedFloats,
-       # type predicates
-         is_unsigned, is_signed, is_finite, is_extended,
-         is_unsigned_finite, is_unsigned_extended,
-         is_signed_finite, is_signed_extended,
-       # type contexts
-         bitwidth, precision, signedness, domain,
-       # constants
-         SmallBitwidthMin, SmallBitwidthMax, 
-         MediumBitwidthMin, MediumBitwidthMax, 
-         LargeBitwidthMin, LargeBitwidthMax,
-         # predicates for constants
-         is_bitwidth_valid, is_bitwidth_small, is_bitwidth_medium, is_bitwidth_large,
+export AIFloat, valueseq
 
-         # macros
+cd(s"C:\Users\Custom PC\Documents\Presentations\CoNGA-2025\FloatsForAI.jl\src")
 
-       
-using AlignedAllocs, FixedSizeArrays
+include("construct/struct.jl")
+include("construct/constructors.jl")
+include("construct/abstract.jl")
+include("construct/concrete.jl")
 
-include("constants.jl")
-include("macros.jl")
+include("valueseq/expseq.jl")
+include("valueseq/fracseq.jl")
+include("valueseq/intseq.jl")
 
-include("abstract_types.jl"
-)
+include("valueseq/ufvalueseq.jl")
+include("valueseq/uevalueseq.jl")
+include("valueseq/sfvalueseq.jl")
+include("valueseq/sevalueseq.jl")
 
-include("types.jl")
+function code_seq(x::AIFloat)
+    n = x.n_values
+    T = x.bitwidth <= 8  ? UInt8  :
+        x.bitwidth <= 16 ? UInt16 :
+        x.bitwidth <= 32 ? UInt32 :
+                           UInt64
+    return map(T, collect(0:n-1))
+end
 
-end  # AI-Floats
+end # module FloatsForAI
