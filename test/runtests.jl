@@ -2,6 +2,47 @@ using AIFloats, Test
 
 include("macros.jl")
 
+function format_name(AIF::AIFloat{T,Σ,Δ})
+    sigma = is_unsigned(AIF) ? "u" : "s"
+    delta = is_finite(AIF) ? "f" : "e"
+    Symbol(string("Binary", AIF.bitwidth, "P", AIF.precision, "_", sigma, delta))
+end
+
+function values_name(AIF::AIFloat{T,Σ,Δ})
+    sigma = is_unsigned(AIF) ? "u" : "s"
+    delta = is_finite(AIF) ? "f" : "e"
+    name = Symbol(string(sigma, delta, "K", AIF.bitwidth, "P", AIF.precision))
+    vals = values(AIF)
+    assign(name, vals)
+end
+
+maxbits = 6
+T = Float64
+for Δ in (:finite, :extended)
+    for bitwidth in 2:maxbits
+        Σ = :unsigned
+        for precision in 1:bitwidth
+            AIF = AIFloat{T,Σ,Δ}(bitwidth, precision)
+            assign(format_name(AIF), AIF)
+            aiAIvalues = values(AIF)
+        end
+        Σ = :signed
+        for precision in 1:bitwidth-1
+            AIF = AIFloat{T,Σ,Δ}(bitwidth, precision)
+            assign(format_name(AIF), AIF)
+        end
+    end
+end
+
+
+
+                
+                for AIF in (AIFloat{T,Σ,Δ}(bitwidth, precision))
+assign(format_name(AIF), AIF)i
+
+evaluesAIFloat(bitwidth, precision, Σ, Δ; T=Float64)
+
+
 UF(bitwidth, precision) = FloatsForAI.AIFloat(bitwidth, precision, :unsigned, :finite; T=Float32)
 ufseq(bitwidth, precision) = valueseq(UF(bitwidth, precision))
 

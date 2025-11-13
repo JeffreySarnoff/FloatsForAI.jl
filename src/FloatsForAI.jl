@@ -2,16 +2,11 @@ module FloatsForAI
 
 export AIFloat, codes, values
 
-include("construct/struct.jl")
-include("construct/constructors.jl")
-include("construct/abstract.jl")
-include("construct/concrete.jl")
+include("construtors.jl")
+include("abstract_and_concrete.jl")
 
-include("code_sequence.jl")
-include("value_sequence.jl")
-include("value_support/expseq.jl")
-include("value_support/fracseq.jl")
-include("value_support/intseq.jl")
+include("codes_and_values.jl")
+include("zero_and_larger_values.jl")
 
 
 end # module FloatsForAI
