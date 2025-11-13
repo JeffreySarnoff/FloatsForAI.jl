@@ -1,25 +1,17 @@
 module FloatsForAI
 
-export AIFloat, valueseq
-
+export AIFloat, codes, values
 
 include("construct/struct.jl")
 include("construct/constructors.jl")
 include("construct/abstract.jl")
 include("construct/concrete.jl")
 
-include("values.jl")
-include("valueseq/expseq.jl")
-include("valueseq/fracseq.jl")
-include("valueseq/intseq.jl")
+include("code_sequence.jl")
+include("value_sequence.jl")
+include("value_support/expseq.jl")
+include("value_support/fracseq.jl")
+include("value_support/intseq.jl")
 
-function code_seq(x::AIFloat)
-    n = x.n_values
-    T = x.bitwidth <= 8  ? UInt8  :
-        x.bitwidth <= 16 ? UInt16 :
-        x.bitwidth <= 32 ? UInt32 :
-                           UInt64
-    return map(T, collect(0:n-1))
-end
 
 end # module FloatsForAI

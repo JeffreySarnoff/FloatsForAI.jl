@@ -1,4 +1,4 @@
-# valueseq.jl
+# values.jl
 
 # common helpers are in value_support.jl:
 #   exponents(x, stride)
@@ -8,7 +8,7 @@
 #
 # UNSIGNED (finite or extended)
 #
-function valueseq(x::AIFloat{T, :unsigned, Δ}) where {T, Δ}
+function values(x::AIFloat{T, :unsigned, Δ}) where {T, Δ}
     # span width: how many fractionals we repeat per exponent
     stride = x.n_values ÷ 2^x.exp_bits
     # poz is positive or zero
@@ -26,10 +26,10 @@ end
 #
 # SIGNED (finite or extended)
 #
-function valueseq(x::AIFloat{T, :signed, Δ}) where {T, Δ}
+function values(x::AIFloat{T, :signed, Δ}) where {T, Δ}
     # signed from unsigned
     u = AIFloat(x.bitwidth, x.precision+1, :unsigned, Δ; T)
-    poz = valueseq(u)[1:2:end]
+    poz = values(u)[1:2:end]
 
     if Δ === :extended
         poz[end] = T(Inf)
