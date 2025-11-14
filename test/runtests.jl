@@ -1,19 +1,19 @@
 using AIFloats, Test
 
-include("macros.jl")
+include(joinpath(@__DIR__,"..","test","macros.jl"))
 
 function format_name(AIF::AIFloat{T,Σ,Δ})
     sigma = is_unsigned(AIF) ? "u" : "s"
     delta = is_finite(AIF) ? "f" : "e"
-    Symbol(string("Binary", AIF.bitwidth, "P", AIF.precision, "_", sigma, delta))
+    Symbol(string("Binary", AIF.bitwidth, "P", AIF.precision, sigma, delta))
 end
 
-function values_name(AIF::AIFloat{T,Σ,Δ})
+function values_name(AIF::AIFloat{T,Σ,Δ}) where {T,Σ,Δ}
     sigma = is_unsigned(AIF) ? "u" : "s"
     delta = is_finite(AIF) ? "f" : "e"
     name = Symbol(string(sigma, delta, "K", AIF.bitwidth, "P", AIF.precision))
     vals = values(AIF)
-    assign(name, vals)
+    @assign(name, vals)
 end
 
 maxbits = 6
