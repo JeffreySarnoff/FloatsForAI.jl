@@ -2,7 +2,7 @@ module FloatsForAI
 
 export AIFloat, codes, values
 
-include("construtors.jl")
+include("constructors.jl")
 include("abstract_and_concrete.jl")
 
 include("codes_and_values.jl")
