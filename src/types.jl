@@ -42,4 +42,30 @@ function suffix(s::Signedness, d::Domain)
     string(schar, dchar)
 end
 
-  
+struct Format
+   K::Int
+   P::Int
+   σ::Bool
+   δ::Bool
+end
+
+function Format(K::Int, P::Int, Σ::Signedness, Δ::Domain)
+    σ = is_signed(Σ)
+    δ = is_extended(Δ)
+    if (P < 1)
+       error("P ($P) < 1")
+   elseif (K < P - σ)
+        error("K >= P - σ ($K >= $P - $σ)")
+    end
+    Format(K, P, σ, δ)
+end
+
+function Base.string(x::Format)
+    string("Binary", x.K, "P", x.P, suffix(x.σ, x.δ))
+end
+
+function Base.show(io::IO, ::MIME"text/plain", x::Format)
+    print(io, string(x))
+end
+
+
