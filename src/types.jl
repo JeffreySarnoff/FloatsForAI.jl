@@ -36,6 +36,12 @@ function Domain(; finite::MaybeBool=nothing, extended::MaybeBool=nothing)
     Domain(finite, extended)
 end
 
+function suffix(is_signed::Bool, is_extended::Bool)
+    schar = !is_signed ? 'u' : 's'
+    dchar = !is_extended ? 'f' : 'e'
+    string(schar, dchar)
+end
+
 function suffix(s::Signedness, d::Domain)
     schar = is_unsigned(s) ? 'u' : 's'
     dchar = is_finite(d) ? 'f' : 'e'
@@ -61,7 +67,7 @@ function Format(K::Int, P::Int, Σ::Signedness, Δ::Domain)
 end
 
 function Base.string(x::Format)
-    string("Binary", x.K, "P", x.P, suffix(x.σ, x.δ))
+    string("Binary", x.K, "p", x.P, suffix(x.σ, x.δ))
 end
 
 function Base.show(io::IO, ::MIME"text/plain", x::Format)
