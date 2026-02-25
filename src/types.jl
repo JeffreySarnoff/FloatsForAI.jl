@@ -1,3 +1,5 @@
+import Base: convert, Int
+
 const MaybeBool = Union{Bool, Nothing}
 
 struct Signedness
@@ -7,6 +9,9 @@ end
 
 is_unsigned(x::Signedness) = x.unsigned
 is_signed(x::Signedness) = x.signed
+
+Base.convert(Int, x::Signedness) = 0 + x.signed
+Base.Int(x::Signedness) = Base.convert(Int, x)
 
 function Signedness(; unsigned::MaybeBool=nothing, signed::MaybeBool=nothing)
     if (unsigned == signed) || (isnothing(unsigned) && isnothing(signed))
@@ -25,6 +30,9 @@ end
 
 is_finite(x::Domain) = x.finite
 is_extended(x::Domain) = x.extended
+
+Base.convert(Int, x::Domain) = 0 + x.extended
+Base.Int(x::Domain) = Base.convert(Int, x)
 
 function Domain(; finite::MaybeBool=nothing, extended::MaybeBool=nothing)
     if (finite == extended) || (isnothing(finite) && isnothing(extended))
