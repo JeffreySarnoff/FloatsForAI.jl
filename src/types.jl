@@ -74,4 +74,11 @@ function Base.show(io::IO, ::MIME"text/plain", x::Format)
     print(io, string(x))
 end
 
+BitwidthOf(x::Format) = x.K
+PrecisionOf(x::Format) = x.P
+TrailingBitsOf(x::Format) = PrecisionOf(x) - 1
+SignBitsOf(x::Format) = x.σ + 0
+ExponentBitsOf(x::Format) = BitwidthOf(x) - PrecisionOf(x) + is_unsigned(x)
+ExponentBiasOf(x::Format) = 2^(ExponentBitsOf(x) - 1) - is_signed(x)
+
 
