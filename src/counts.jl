@@ -3,7 +3,7 @@ nZerosOf(x::Format) = 1
 nInfsOf(x::Format) = is_finite(x) ? 0 : (1 + is_signed(x))
 
 nValuesOf(x::Format) = let K = BitwidthOf(x);
-    K < ExpMIF64 ? 2^K : Large2^K
+    twopow(K)
 end
   
 nNumericValuesOf(x::Format) = nValuesOf(x) - 1
@@ -17,12 +17,12 @@ nNonnegativeFinitesOf(x::Format) = nPositiveFinitesOf(x) + 1
 
 nPositiveSubnormalsOf(x::Format) = let P = PrecisionOf(x);
     isone(P) && return 0
-    2^(P - 1) - 1
+    twopowm1(P) - 1
 end
 
 nNegativeSubnormalsOf(x::Format) = is_signed(x) * nPositiveSubnormalsOf(x)
 
-nSubnormalsOf(x::Format) = 2^(PrecisionOf(x) - is_unsigned(x)) - 1 - is_signed(x)
+nSubnormalsOf(x::Format) = twopow(PrecisionOf(x) - is_unsigned(x)) - 1 - is_signed(x)
 
 nPrenormalsOf(x::Format) = nSubnormalsOf(x) + 1
 nNonnegativePrenormalsOf(x::Format) = nPositiveSubnormalsOf(x) + 1
