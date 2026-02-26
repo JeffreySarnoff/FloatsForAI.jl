@@ -86,6 +86,9 @@ TrailingBitsOf(x::Format) = PrecisionOf(x) - 1
 SignBitsOf(x::Format) = x.σ + 0
 ExponentBitsOf(x::Format) = WuOf(x) + is_unsigned(x)
 
+ExponentFieldBitsOf(x::Format) = BitwidthOf(x) - PrecisionOf(x) + (1 - is_signed(x)) 
+SignMultiplicityOf(x::Format) = 0x01 + is_signed(x)
+
 function ExponentBiasOf(x::Format)
     wu = WuOf(x)
     (wu < ExpMIF64 ? 2^wu : Large2^wu) - is_signed(x)
