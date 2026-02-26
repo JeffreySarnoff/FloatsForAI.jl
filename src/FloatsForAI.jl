@@ -2,6 +2,8 @@ module FloatsForAI
 
 export AIFloat, codes, values
 
+using Quadmath: Float128
+
 include("constants.jl")
 include("types.jl")
 include("counts.jl")
@@ -15,5 +17,6 @@ include("zero_and_larger_values.jl")
 =#
 
 end # module FloatsForAI
+
 
 
