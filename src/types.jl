@@ -1,5 +1,3 @@
-include("constants.jl")
-
 struct Signedness
    unsigned::Bool
      signed::Bool
