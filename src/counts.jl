@@ -11,9 +11,29 @@ nNonFinitesOf(x::Format) = nNaNsOf(x) + nInfsOf(x)
 nFinitesOf(x::Format) = nValuesOf(x) - nNonFinitesOf(x)
 nNonzeroFinitesOf(x::Format) = nFinitesOf(x) - nZerosOf(x)
 
-nStrictlyPositiveFinitesOf(x::Format) = nNonzeroFinitesOf(x) >> is_signed(x)
-nNegativeFinitesOf(x::Format) = is_signed(x) * nStrictlyPositiveFinitesOf(x)
-nNonnegativeFinitesOf(x::Format) = nStrictlyPositiveFinitesOf(x) + 1
+nPositiveFinitesOf(x::Format) = nNonzeroFinitesOf(x) >> is_signed(x)
+nNegativeFinitesOf(x::Format) = is_signed(x) * nPositiveFinitesOf(x)
+nNonnegativeFinitesOf(x::Format) = nPositiveFinitesOf(x) + 1
+
+nPositiveSubnormalsOf(x::Format) = let P = PrecisionOf(x);
+    isone(P) && return 0
+    2^(P - 1) - 1
+end
+
+nNegativeSubnormalsOf(x::Format) = is_signed(x) * nPositiveSubnormalsOf(x)
+
+nSubnormalsOf(x::Format) = 2^(PrecisionOf(x) - is_unsigned(x)) - 1 - is_signed(x)
+
+nPrenormalsOf(x::Format) = nSubnormalsOf(x) + 1
+nNonnegativePrenormalsOf(x::Format) = nPositiveSubnormalsOf(x) + 1
+nNonpositivePrenormalsOf(x::Format) = nNegativeSubnormalsOf(x) + 1
+
+nNormalsOf(x::Format) = nFinitesOf(x) - nPrenormalsOf(x)
+nPositiveNormalsOf(x::Format) = nPositiveFinitesOf(x) - nNonnegativePrenormalsOf(x)
+nNegativeNormalsOf(x::Format) = is_signed(x) * nPositiveNormalsOf(x)
+
+
+
 
 
 
