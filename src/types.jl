@@ -1,5 +1,10 @@
 import Base: convert, Int
 
+const Large1 = one(Int128)
+const Large2 = Int128(2)
+const Large3 = Int128(3)
+const Large4 = Int128(4)
+
 const MaybeBool = Union{Bool, Nothing}
 
 struct Signedness
@@ -86,7 +91,41 @@ BitwidthOf(x::Format) = x.K
 PrecisionOf(x::Format) = x.P
 TrailingBitsOf(x::Format) = PrecisionOf(x) - 1
 SignBitsOf(x::Format) = x.σ + 0
-ExponentBitsOf(x::Format) = BitwidthOf(x) - PrecisionOf(x) + is_unsigned(x)
-ExponentBiasOf(x::Format) = 2^(ExponentBitsOf(x) - 1) - is_signed(x)
+ExponentBitsOf(x::Format) = WuOf(x) + is_unsigned(x)
 
+const ExpMIF64 = exponent(maxintfloat(Float64)) # 53
 
+function ExponentBiasOf(x::Format)
+    wu = WuOf(x)
+    (wu < ExpMIF64 ? 2^wu : Large2^wu) - is_signed(x)
+end
+
+WuOf(x::Format) = BitwidthOf(x) - PrecisionOf(x)
+WuuOf(x::Format) = BitwidthOf(x) - PrecisionOf(x) - 1
+
+function pow2WuOf(x::Format)
+    wu = WuOf(x)
+    (wu < ExpMIF64 ? 2^wu : Large2^wu)
+end
+
+function pow2WuuOf(x::Format)
+    wu = WuuOf(x)
+    (wu < ExpMIF64 ? 2^wu : Large2^wu)
+end
+
+ExponentMinOf(x::Format) = (BitwidthOf(x) < ExpMIF64 ? 1 : Large1) - ExponentBiasOf(x)
+
+function ExponentMaxOf(x::Format)
+   if PrecisionOf(x) > 2
+      return (is_unsigned(x) ? pow2WuOf(x) : pow2WuuOf(x)) - 1
+   end
+   K = BitwidthOf(x)
+   P = PrecisionOf(x)
+   # sgnd = is_signed(x)
+   unsd = is_unsigned
+   extd = is_extended(x)
+   # (s ? pow2WuuOf(x) : pow2WuOf(x)) - 2 - extd * !sgnd * ( 2 - P )
+   (s ? pow2WuuOf(x) : pow2WuOf(x)) - 2 - extd * unsd * ( 2 - P )
+end
+
+   
