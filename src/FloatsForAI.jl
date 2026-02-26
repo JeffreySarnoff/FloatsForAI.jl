@@ -1,7 +1,7 @@
 module FloatsForAI
 
 export AIFloat, codes, values
-export Format, Signedness, Domain,
+export Format, Signedness, Domain, MaybeBool,
        is_unsigned, is_signed, is_finite, is_extended,
        BitwidthOf, PrecisionOf, TrailingBitsOf, SignBitsOf,
        ExponentBitsOf, ExponentFieldBitsOf, 
@@ -24,6 +24,7 @@ include("zero_and_larger_values.jl")
 =#
 
 end # module FloatsForAI
+
 
 
 
