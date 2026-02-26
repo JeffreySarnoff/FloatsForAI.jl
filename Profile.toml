@@ -1,17 +1,20 @@
 name = "FloatsForAI"
 author = "Jeffrey Sarnoff <jeffrey.sarnoff@ieee.org>"
 uuid = "75ef3f06-58cf-4a83-8020-0c6578e19c41"
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
+Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
 AlignedAllocs = "6ac60441-711f-43f0-8178-7f71f0888134"
 FixedSizeArrays = "3821ddf9-e5b5-40d5-8e25-6813ab96b5e2"
 
+
 [compat]
+Quadmath = "1.0"
 Test = "1.11 - 1.12"
 AlignedAllocs = "0.2.0 - 0.2.9, 0.3 - 0.5"
 FixedSizeArrays = "1.2"
-julia = "1.12-dev"
+julia = "1.12"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
