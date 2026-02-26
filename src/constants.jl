@@ -24,3 +24,11 @@ function pow2WuOfm1(x::Format)
     (wu < ExpMIF64 ? 2^wu : Large2^wu)
 end
 =#
+
+function twopow(x::I) where {I<:Integer}
+    (x < ExpMIF64 ? 2 : Large2)^x
+end
+
+function twopowm1(x::I) where {I<:Integer}
+    (x < ExpMIF64 ? 2 : Large2)^(x - 1)
+end
