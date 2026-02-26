@@ -1,3 +1,8 @@
+abstract type FormatAI end
+abstract type SignedFormatAI <: FormatAI end
+abstract type UnsignedFormatAI <: FormatAI end
+
+
 struct Signedness
    unsigned::Bool
      signed::Bool
@@ -59,7 +64,7 @@ struct Format
    δ::Bool
 end
 
-function Format(K::Int, P::Int, Σ::Signedness, Δ::Domain)
+function Format(K::Int, P::Int, Σ::Signedness, Δ::Domain) <: FormatAI
     σ = is_signed(Σ)
     δ = is_extended(Δ)
     if (P < 1)
