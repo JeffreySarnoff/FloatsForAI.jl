@@ -15,35 +15,22 @@ nPositiveFinitesOf(x::Format) = nNonzeroFinitesOf(x) >> is_signed(x)
 nNegativeFinitesOf(x::Format) = is_signed(x) * nPositiveFinitesOf(x)
 nNonnegativeFinitesOf(x::Format) = nPositiveFinitesOf(x) + 1
 
-nPositiveSubnormalsOf(x::Format) = let P = PrecisionOf(x);
-    isone(P) && return 0
-    twopowm1(P) - 1
-end
-
-nTotalSubnormalsOf(x::Format) = SignMultiplicityOf(x) * nPositiveSubnormalsOf(x)
-
-nNegativeSubnormalsOf(x::Format) = is_signed(x) * nPositiveSubnormalsOf(x)
-
-nSubnormalsOf(x::Format) = twopow(PrecisionOf(x) - is_unsigned(x)) - 1 - is_signed(x)
-
 nPrenormalsOf(x::Format) = nSubnormalsOf(x) + 1
 nNonnegativePrenormalsOf(x::Format) = nPositiveSubnormalsOf(x) + 1
 nNonpositivePrenormalsOf(x::Format) = nNegativeSubnormalsOf(x) + 1
-
-nNormalsOf(x::Format) = nFinitesOf(x) - nPrenormalsOf(x)
-nPositiveNormalsOf(x::Format) = nPositiveFinitesOf(x) - nNonnegativePrenormalsOf(x)
-nNegativeNormalsOf(x::Format) = is_signed(x) * nPositiveNormalsOf(x)
 
 #=
 Let 𝐸max_finite be the maximum biased exponent field value that is still usable by finite normals
     (i.e., the highest exponent-field value that is not “lost” to NaN/Inf encodings in the low-precision corner cases)
 =#
 
-nPosSubnormalsOf(x::Format) = twopowm1(Precision(x)) - 0x01
-nSubnormalsOf(x::Format) = SignMultiplicityOf(x) * nPosSubnormalsOf(x)
+nPosititveSubnormalsOf(x::Format) = twopowm1(Precision(x)) - 0x01
+nNegativeSubnormalsOf(x::Format) = is_signed(x) * nPositiveSubnormalsOf(x)
+nSubnormalsOf(x::Format) = SignMultiplicityOf(x) * nPositiveSubnormalsOf(x)
 
-nPosNormalsOf(x::Format) = twopowm1(Precision(x)) * Emax_finite(x)
-nNormalsOf(x::Format) = SignMultiplicityOf(x) * nPosNormalsOf(x)
+nPositiveNormalsOf(x::Format) = twopowm1(Precision(x)) * Emax_finite(x)
+nNegativeNormalsOf(x::Format) = is_signed(x) * nPositiveNormalsOf(x)
+nNormalsOf(x::Format) = SignMultiplicityOf(x) * nPositiveNormalsOf(x)
 
 function Emax_finite(x::Format)
     P = Precision(x)
