@@ -101,15 +101,15 @@ function ExponentBiasOf(x::Format)
 end
 
 WuOf(x::Format) = BitwidthOf(x) - PrecisionOf(x)
-WuuOf(x::Format) = BitwidthOf(x) - PrecisionOf(x) - 1
+WuOfm1(x::Format) = BitwidthOf(x) - PrecisionOf(x) - 1
 
 function pow2WuOf(x::Format)
     wu = WuOf(x)
     (wu < ExpMIF64 ? 2^wu : Large2^wu)
 end
 
-function pow2WuuOf(x::Format)
-    wu = WuuOf(x)
+function pow2WuOfm1(x::Format)
+    wu = WuOfm1(x)
     (wu < ExpMIF64 ? 2^wu : Large2^wu)
 end
 
@@ -117,7 +117,7 @@ ExponentMinOf(x::Format) = (BitwidthOf(x) < ExpMIF64 ? 1 : Large1) - ExponentBia
 
 function ExponentMaxOf(x::Format)
    if PrecisionOf(x) > 2
-      return (is_unsigned(x) ? pow2WuOf(x) : pow2WuuOf(x)) - 1
+      return (is_unsigned(x) ? pow2WuOf(x) : pow2WuOfm1(x)) - 1
    end
    K = BitwidthOf(x)
    P = PrecisionOf(x)
@@ -125,7 +125,7 @@ function ExponentMaxOf(x::Format)
    unsd = is_unsigned
    extd = is_extended(x)
    # (s ? pow2WuuOf(x) : pow2WuOf(x)) - 2 - extd * !sgnd * ( 2 - P )
-   (s ? pow2WuuOf(x) : pow2WuOf(x)) - 2 - extd * unsd * ( 2 - P )
+   (s ? pow2WuOfm1(x) : pow2WuOf(x)) - 2 - extd * unsd * ( 2 - P )
 end
 
    
