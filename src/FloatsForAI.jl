@@ -1,17 +1,17 @@
 module FloatsForAI
 
-export AIFloat, codes, values
-export Format, Signedness, Domain, MaybeBool,
+export Format, SignedFormat, UnsignedFormat, SFormat, UFormat,
+       Domain, Finite, Extended, MaybeBool,
        is_unsigned, is_signed, is_finite, is_extended,
        BitwidthOf, PrecisionOf, TrailingBitsOf, SignBitsOf,
-       ExponentBitsOf, ExponentFieldBitsOf, 
+       ExponentBitsOf, ExponentFieldBitsOf,
        ExponentBiasOf, ExponentMinOf, ExponentMaxOf,
        SignMultiplicityOf, twopow, twopowm1
 export nNaNsOf, nZerosOf, nInfsOf,
        nValuesOf, nNumericValuesOf, nNonFinitesOf, nFinitesOf, nNonzeroFinitesOf,
        nPositiveFinitesOf, nNegativeFinitesOf, nNonnegativeFinitesOf,
        nPrenormalsOf, nNonnegativePrenormalsOf, nNonpositivePrenormalsOf,
-       nPosititveSubnormalsOf, nNegativeSubnormalsOf, nSubnormalsOf,
+       nPositiveSubnormalsOf, nNegativeSubnormalsOf, nSubnormalsOf,
        nPositiveNormalsOf, nNegativeNormalsOf, nNormalsOf
 
 

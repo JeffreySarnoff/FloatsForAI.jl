@@ -11,5 +11,6 @@ end
 
 codepoint_zero(x::Format) = zero(codetype(x))
 codepoint_one(x::Format) = twopowm1(BitwidthOf(x) - is_signed(x))
-codepoint_nan(x::Format) = is_unsigned(x) ? twopow(BitwidthOf(x)) - 0x01 :  twopowm1(BitwidthOf(x))
+codepoint_nan(x::UnsignedFormat) = twopow(BitwidthOf(x)) - 0x01
+codepoint_nan(x::SignedFormat)   = twopowm1(BitwidthOf(x))
 

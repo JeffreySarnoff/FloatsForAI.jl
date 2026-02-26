@@ -1,176 +1,201 @@
-using AIFloats, Test
+using FloatsForAI, Test
 
-include(joinpath(@__DIR__,"..","test","macros.jl"))
+@testset "FloatsForAI" begin
 
-function format_name(AIF::AIFloat{T,Σ,Δ}) where {T,Σ,Δ}
-    sigma = is_unsigned(AIF) ? "u" : "s"
-    delta = is_finite(AIF) ? "f" : "e"
-    Symbol(string("Binary", AIF.bitwidth, "P", AIF.precision, sigma, delta))
+@testset "Construction" begin
+    sf = SignedFormat(8, 4, Finite)
+    uf = UnsignedFormat(8, 4, Finite)
+    @test sf.K == 8
+    @test sf.P == 4
+    @test sf.δ == false
+    @test uf.K == 8
+    @test uf.P == 4
+
+    uf_e = UnsignedFormat(8, 4, Extended)
+    @test is_extended(uf_e)
+
+    @test Finite == Domain(true, false)
+    @test Extended == Domain(false, true)
 end
 
-function values_name(AIF::AIFloat{T,Σ,Δ}) where {T,Σ,Δ}
-    sigma = is_unsigned(AIF) ? "u" : "s"
-    delta = is_finite(AIF) ? "f" : "e"
-    name = Symbol(string("K", AIF.bitwidth, "P", AIF.precision, sigma, delta))
-    vals = values(AIF)
-    @assign(name, vals)
+@testset "Constructor validation" begin
+    @test_throws ErrorException SignedFormat(8, 0, Finite)
+    @test_throws ErrorException UnsignedFormat(8, 0, Finite)
+    @test_throws ErrorException SignedFormat(3, 5, Finite)
 end
 
-maxbits = 6
-T = Float64
-for Δ in (:finite, :extended)
-    for bitwidth in 2:maxbits
-        Σ = :unsigned
-        for precision in 1:bitwidth
-            AIF = AIFloat{T,Σ,Δ}(bitwidth, precision)
-            assign(format_name(AIF), AIF)
-            aiAIvalues = values(AIF)
+@testset "Type dispatch" begin
+    sf = SignedFormat(8, 4, Finite)
+    uf = UnsignedFormat(8, 4, Finite)
+
+    @test sf isa Format
+    @test uf isa Format
+    @test sf isa SignedFormat
+    @test uf isa UnsignedFormat
+    @test !(sf isa UnsignedFormat)
+    @test !(uf isa SignedFormat)
+    @test SignedFormat <: Format
+    @test UnsignedFormat <: Format
+end
+
+@testset "Signedness" begin
+    sf = SignedFormat(8, 4, Finite)
+    uf = UnsignedFormat(8, 4, Finite)
+
+    @test is_signed(sf) == true
+    @test is_unsigned(sf) == false
+    @test is_signed(uf) == false
+    @test is_unsigned(uf) == true
+
+    @test SignBitsOf(sf) == 1
+    @test SignBitsOf(uf) == 0
+    @test SignMultiplicityOf(sf) == 2
+    @test SignMultiplicityOf(uf) == 1
+end
+
+@testset "Domain" begin
+    ff = SignedFormat(8, 4, Finite)
+    fe = SignedFormat(8, 4, Extended)
+
+    @test is_finite(ff) == true
+    @test is_extended(ff) == false
+    @test is_finite(fe) == false
+    @test is_extended(fe) == true
+
+    @test is_finite(Finite)
+    @test is_extended(Extended)
+    @test_throws ErrorException Domain(finite=true, extended=true)
+    @test_throws ErrorException Domain()
+end
+
+@testset "Display" begin
+    @test string(SignedFormat(8, 4, Finite))    == "Binary8p4sf"
+    @test string(UnsignedFormat(8, 4, Finite))  == "Binary8p4uf"
+    @test string(SignedFormat(8, 4, Extended))   == "Binary8p4se"
+    @test string(UnsignedFormat(8, 4, Extended)) == "Binary8p4ue"
+end
+
+@testset "Accessors" begin
+    sf = SignedFormat(8, 4, Finite)
+    uf = UnsignedFormat(8, 4, Finite)
+
+    @test BitwidthOf(sf) == 8
+    @test PrecisionOf(sf) == 4
+    @test TrailingBitsOf(sf) == 3
+
+    @test ExponentFieldBitsOf(sf) == 4
+    @test ExponentFieldBitsOf(uf) == 5
+
+    @test ExponentBiasOf(sf) == 15
+    @test ExponentBiasOf(uf) == 16
+
+    @test ExponentMinOf(sf) == -14
+    @test ExponentMinOf(uf) == -15
+end
+
+@testset "ExponentMaxOf" begin
+    @test ExponentMaxOf(SignedFormat(8, 4, Finite)) == 7
+    @test ExponentMaxOf(UnsignedFormat(8, 4, Finite)) == 15
+
+    @test ExponentMaxOf(SignedFormat(8, 3, Finite)) == 15
+    @test ExponentMaxOf(UnsignedFormat(8, 3, Finite)) == 31
+
+    sf2 = SignedFormat(8, 2, Finite)
+    uf2 = UnsignedFormat(8, 2, Finite)
+    @test ExponentMaxOf(sf2) == 30
+    @test ExponentMaxOf(uf2) == 62
+
+    sf1 = SignedFormat(8, 1, Finite)
+    uf1 = UnsignedFormat(8, 1, Finite)
+    @test ExponentMaxOf(sf1) == 62
+    @test ExponentMaxOf(uf1) == 126
+end
+
+@testset "Counts: values and infinities" begin
+    sf = SignedFormat(4, 2, Finite)
+    uf = UnsignedFormat(4, 2, Finite)
+    se = SignedFormat(4, 2, Extended)
+    ue = UnsignedFormat(4, 2, Extended)
+
+    @test nValuesOf(sf) == 16
+    @test nValuesOf(uf) == 16
+    @test nNaNsOf(sf) == 1
+    @test nZerosOf(sf) == 1
+
+    @test nInfsOf(sf) == 0
+    @test nInfsOf(uf) == 0
+    @test nInfsOf(se) == 2
+    @test nInfsOf(ue) == 1
+
+    @test nNumericValuesOf(sf) == 15
+    @test nNonFinitesOf(se) == 3
+    @test nNonFinitesOf(ue) == 2
+end
+
+@testset "Counts: finites" begin
+    sf = SignedFormat(4, 2, Finite)
+    uf = UnsignedFormat(4, 2, Finite)
+
+    @test nNegativeFinitesOf(uf) == 0
+    @test nNegativeFinitesOf(sf) == nPositiveFinitesOf(sf)
+    @test nNonnegativeFinitesOf(sf) == nPositiveFinitesOf(sf) + 1
+    @test nFinitesOf(sf) == nPositiveFinitesOf(sf) + nNegativeFinitesOf(sf) + nZerosOf(sf)
+    @test nFinitesOf(uf) == nPositiveFinitesOf(uf) + nZerosOf(uf)
+end
+
+@testset "Counts: subnormals" begin
+    sf = SignedFormat(4, 2, Finite)
+    uf = UnsignedFormat(4, 2, Finite)
+
+    @test nNegativeSubnormalsOf(uf) == 0
+    @test nNegativeSubnormalsOf(sf) == nPositiveSubnormalsOf(sf)
+    @test nSubnormalsOf(sf) == 2 * nPositiveSubnormalsOf(sf)
+    @test nSubnormalsOf(uf) == nPositiveSubnormalsOf(uf)
+end
+
+@testset "Counts: normals" begin
+    sf = SignedFormat(4, 2, Finite)
+    uf = UnsignedFormat(4, 2, Finite)
+
+    @test nNegativeNormalsOf(uf) == 0
+    @test nNegativeNormalsOf(sf) == nPositiveNormalsOf(sf)
+    @test nNormalsOf(sf) == 2 * nPositiveNormalsOf(sf)
+    @test nNormalsOf(uf) == nPositiveNormalsOf(uf)
+end
+
+@testset "Count consistency" begin
+    for K in 2:8, P in 1:K
+        for (label, fmt) in [
+            ("uf", UnsignedFormat(K, P, Finite)),
+            ("ue", UnsignedFormat(K, P, Extended)),
+        ]
+            total = nFinitesOf(fmt) + nNonFinitesOf(fmt)
+            @test total == nValuesOf(fmt)
+
+            finites = nPositiveFinitesOf(fmt) + nZerosOf(fmt)
+            @test finites == nFinitesOf(fmt)
+
+            @test nNegativeFinitesOf(fmt) == 0
+            @test nNegativeSubnormalsOf(fmt) == 0
+            @test nNegativeNormalsOf(fmt) == 0
         end
-        Σ = :signed
-        for precision in 1:bitwidth-1
-            AIF = AIFloat{T,Σ,Δ}(bitwidth, precision)
-            assign(format_name(AIF), AIF)
+
+        P >= K && continue
+        for (label, fmt) in [
+            ("sf", SignedFormat(K, P, Finite)),
+            ("se", SignedFormat(K, P, Extended)),
+        ]
+            total = nFinitesOf(fmt) + nNonFinitesOf(fmt)
+            @test total == nValuesOf(fmt)
+
+            finites = nPositiveFinitesOf(fmt) + nNegativeFinitesOf(fmt) + nZerosOf(fmt)
+            @test finites == nFinitesOf(fmt)
+
+            @test nNegativeFinitesOf(fmt) == nPositiveFinitesOf(fmt)
+            @test nNegativeSubnormalsOf(fmt) == nPositiveSubnormalsOf(fmt)
+            @test nNegativeNormalsOf(fmt) == nPositiveNormalsOf(fmt)
         end
     end
 end
 
-
-
-                
-                for AIF in (AIFloat{T,Σ,Δ}(bitwidth, precision))
-assign(format_name(AIF), AIF)i
-
-evaluesAIFloat(bitwidth, precision, Σ, Δ; T=Float64)
-
-
-UF(bitwidth, precision) = FloatsForAI.AIFloat(bitwidth, precision, :unsigned, :finite; T=Float32)
-ufseq(bitwidth, precision) = valueseq(UF(bitwidth, precision))
-
-UE(bitwidth, precision) = FloatsForAI.AIFloat(bitwidth, precision, :unsigned, :extended; T=Float32)
-ueseq(bitwidth, precision) = valueseq(UE(bitwidth, precision))
-
-SF(bitwidth, precision) = FloatsForAI.AIFloat(bitwidth, precision, :signed, :finite; T=Float32)
-sfseq(bitwidth, precision) = valueseq(SF(bitwidth, precision))
-
-SE(bitwidth, precision) = FloatsForAI.AIFloat(bitwidth, precision, :signed, :extended; T=Float32)
-seseq(bitwidth, precision) = valueseq(SE(bitwidth, precision))
-
-
-Binary4p1ue = UE(4,1); Binary4p1ue_values = ueseq(4,1);
-Binary4p1uf = UF(4,1); Binary4p1uf_values = ufseq(4,1);
-Binary4p1se = SE(4,1); Binary4p1se_values = seseq(4,1);
-Binary4p1sf = SF(4,1); Binary4p1sf_values = sfseq(4,1);
-
-Binary4p2ue = UE(4,2); Binary4p2ue_values = ueseq(4,2);
-Binary4p2uf = UF(4,2); Binary4p2uf_values = ufseq(4,2);
-Binary4p2se = SE(4,2); Binary4p2se_values = seseq(4,2);
-Binary4p2sf = SF(4,2); Binary4p2sf_values = sfseq(4,2);
-
-Binary4p3ue = UE(4,3); Binary4p3ue_values = ueseq(4,3);
-Binary4p3uf = UF(4,3); Binary4p3uf_values = ufseq(4,3);
-Binary4p3se = SE(4,3); Binary4p3se_values = seseq(4,3);
-Binary4p3sf = SF(4,3); Binary4p3sf_values = sfseq(4,3);
-
-Binary4p4ue = UE(4,4); Binary4p4ue_values = ueseq(4,4);
-Binary4p4uf = UF(4,4); Binary4p4uf_values = ufseq(4,4);
-
-
-Binary5p1ue = UE(5,1); Binary5p1ue_values = ueseq(5,1);
-Binary5p1uf = UF(5,1); Binary5p1uf_values = ufseq(5,1);
-Binary5p1se = SE(5,1); Binary5p1se_values = seseq(5,1);
-Binary5p1sf = SF(5,1); Binary5p1sf_values = sfseq(5,1);
-
-Binary5p2ue = UE(5,2); Binary5p2ue_values = ueseq(5,2);
-Binary5p2uf = UF(5,2); Binary5p2uf_values = ufseq(5,2);
-Binary5p2se = SE(5,2); Binary5p2se_values = seseq(5,2);
-Binary5p2sf = SF(5,2); Binary5p2sf_values = sfseq(5,2);
-
-Binary5p3ue = UE(5,3); Binary5p3ue_values = ueseq(5,3);
-Binary5p3uf = UF(5,3); Binary5p3uf_values = ufseq(5,3);
-Binary5p3se = SE(5,3); Binary5p3se_values = seseq(5,3);
-Binary5p3sf = SF(5,3); Binary5p3sf_values = sfseq(5,3);
-
-Binary5p3ue = UE(5,3); Binary5p3ue_values = ueseq(5,3);
-Binary5p3uf = UF(5,3); Binary5p3uf_values = ufseq(5,3);
-Binary5p3se = SE(5,3); Binary5p3se_values = seseq(5,3);
-Binary5p3sf = SF(5,3); Binary5p3sf_values = sfseq(5,3);
-
-Binary5p4ue = UE(5,4); Binary5p4ue_values = ueseq(5,4);
-Binary5p4uf = UF(5,4); Binary5p4uf_values = ufseq(5,4);
-Binary5p4se = SE(5,4); Binary5p4se_values = seseq(5,4);
-Binary5p4sf = SF(5,4); Binary5p4sf_values = sfseq(5,4);
-
-Binary5p5ue = UE(5,5); Binary5p5ue_values = ueseq(5,5);
-Binary5p5uf = UF(5,5); Binary5p5uf_values = ufseq(5,5);
-
-
-Binary6p1ue = UE(6,1); Binary6p1ue_values = ueseq(6,1);
-Binary6p1uf = UF(6,1); Binary6p1uf_values = ufseq(6,1);
-Binary6p1se = SE(6,1); Binary6p1se_values = seseq(6,1);
-Binary6p1sf = SF(6,1); Binary6p1sf_values = sfseq(6,1);
-
-Binary6p2ue = UE(6,2); Binary6p2ue_values = ueseq(6,2);
-Binary6p2uf = UF(6,2); Binary6p2uf_values = ufseq(6,2);
-Binary6p2se = SE(6,2); Binary6p2se_values = seseq(6,2);
-Binary6p2sf = SF(6,2); Binary6p2sf_values = sfseq(6,2);
-
-Binary6p3ue = UE(6,3); Binary6p3ue_values = ueseq(6,3);
-Binary6p3uf = UF(6,3); Binary6p3uf_values = ufseq(6,3);
-Binary6p3se = SE(6,3); Binary6p3se_values = seseq(6,3);
-Binary6p3sf = SF(6,3); Binary6p3sf_values = sfseq(6,3);
-
-Binary6p3ue = UE(6,3); Binary6p3ue_values = ueseq(6,3);
-Binary6p3uf = UF(6,3); Binary6p3uf_values = ufseq(6,3);
-Binary6p3se = SE(6,3); Binary6p3se_values = seseq(6,3);
-Binary6p3sf = SF(6,3); Binary6p3sf_values = sfseq(6,3);
-
-Binary6p4ue = UE(6,4); Binary6p4ue_values = ueseq(6,4);
-Binary6p4uf = UF(6,4); Binary6p4uf_values = ufseq(6,4);
-Binary6p4se = SE(6,4); Binary6p4se_values = seseq(6,4);
-Binary6p4sf = SF(6,4); Binary6p4sf_values = sfseq(6,4);
-
-Binary6p5ue = UE(6,5); Binary6p5ue_values = ueseq(6,5);
-Binary6p5uf = UF(6,5); Binary6p5uf_values = ufseq(6,5);
-Binary6p5se = SE(6,5); Binary6p5se_values = seseq(6,5);
-Binary6p5sf = SF(6,5); Binary6p5sf_values = sfseq(6,5);
-
-Binary6p6ue = UE(6,6); Binary6p6ue_values = ueseq(6,6);
-Binary6p6uf = UF(6,6); Binary6p6uf_values = ufseq(6,6);
-
-Binary7p1ue = UE(7,1); Binary7p1ue_values = ueseq(7,1);
-Binary7p1uf = UF(7,1); Binary7p1uf_values = ufseq(7,1);
-Binary7p1se = SE(7,1); Binary7p1se_values = seseq(7,1);
-Binary7p1sf = SF(7,1); Binary7p1sf_values = sfseq(7,1);
-
-Binary7p2ue = UE(7,2); Binary7p2ue_values = ueseq(7,2);
-Binary7p2uf = UF(7,2); Binary7p2uf_values = ufseq(7,2);
-Binary7p2se = SE(7,2); Binary7p2se_values = seseq(7,2);
-Binary7p2sf = SF(7,2); Binary7p2sf_values = sfseq(7,2);
-
-Binary7p3ue = UE(7,3); Binary7p3ue_values = ueseq(7,3);
-Binary7p3uf = UF(7,3); Binary7p3uf_values = ufseq(7,3);
-Binary7p3se = SE(7,3); Binary7p3se_values = seseq(7,3);
-Binary7p3sf = SF(7,3); Binary7p3sf_values = sfseq(7,3);
-
-Binary7p3ue = UE(7,3); Binary7p3ue_values = ueseq(7,3);
-Binary7p3uf = UF(7,3); Binary7p3uf_values = ufseq(7,3);
-Binary7p3se = SE(7,3); Binary7p3se_values = seseq(7,3);
-Binary7p3sf = SF(7,3); Binary7p3sf_values = sfseq(7,3);
-
-Binary7p4ue = UE(7,4); Binary7p4ue_values = ueseq(7,4);
-Binary7p4uf = UF(7,4); Binary7p4uf_values = ufseq(7,4);
-Binary7p4se = SE(7,4); Binary7p4se_values = seseq(7,4);
-Binary7p4sf = SF(7,4); Binary7p4sf_values = sfseq(7,4);
-
-Binary7p5ue = UE(7,5); Binary7p5ue_values = ueseq(7,5);
-Binary7p5uf = UF(7,5); Binary7p5uf_values = ufseq(7,5);
-Binary7p5se = SE(7,5); Binary7p5se_values = seseq(7,5);
-Binary7p5sf = SF(7,5); Binary7p5sf_values = sfseq(7,5);
-
-Binary7p6ue = UE(7,6); Binary7p6ue_values = ueseq(7,6);
-Binary7p6uf = UF(7,6); Binary7p6uf_values = ufseq(7,6);
-Binary7p6se = SE(7,6); Binary7p6se_values = seseq(7,6);
-Binary7p6sf = SF(7,6); Binary7p6sf_values = sfseq(7,6);
-
-Binary7p7ue = UE(7,7); Binary7p7ue_values = ueseq(7,7);
-Binary7p7uf = UF(7,7); Binary7p7uf_values = ufseq(7,7);
+end # testset FloatsForAI

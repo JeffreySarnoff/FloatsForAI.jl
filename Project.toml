@@ -1,0 +1,9 @@
+name = "FloatsForAI"
+uuid = "0d60342d-0f51-4f3c-b4f4-131ff2a30584"
+
+[deps]
+Quadmath = "be4d8f0f-7fa4-5f49-b795-2f01399ab2dd"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[compat]
+Test = "1.11.0"
