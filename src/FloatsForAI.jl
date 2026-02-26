@@ -8,7 +8,7 @@ export Format, Signedness, Domain, MaybeBool,
        ExponentBiasOf, ExponentMinOf, ExponentMaxOf,
        SignMultiplicityOf,
 
-
+import Base: convert, Int
 using Quadmath: Float128
 
 include("constants.jl")
@@ -24,6 +24,7 @@ include("zero_and_larger_values.jl")
 =#
 
 end # module FloatsForAI
+
 
 
 
