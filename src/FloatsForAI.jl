@@ -6,7 +6,7 @@ export Format, Signedness, Domain, MaybeBool,
        BitwidthOf, PrecisionOf, TrailingBitsOf, SignBitsOf,
        ExponentBitsOf, ExponentFieldBitsOf, 
        ExponentBiasOf, ExponentMinOf, ExponentMaxOf,
-       SignMultiplicityOf,
+       SignMultiplicityOf, twopow, twopowm1
 
 import Base: convert, Int
 using Quadmath: Float128
@@ -24,6 +24,7 @@ include("zero_and_larger_values.jl")
 =#
 
 end # module FloatsForAI
+
 
 
 
