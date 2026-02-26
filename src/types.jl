@@ -95,13 +95,11 @@ WuOf(x::Format) = BitwidthOf(x) - PrecisionOf(x)
 WuOfm1(x::Format) = BitwidthOf(x) - PrecisionOf(x) - 1
 
 function pow2WuOf(x::Format)
-    wu = WuOf(x)
-    (wu < ExpMIF64 ? 2^wu : Large2^wu)
+    twopow(WuOf(x))
 end
 
 function pow2WuOfm1(x::Format)
-    wu = WuOfm1(x)
-    (wu < ExpMIF64 ? 2^wu : Large2^wu)
+    twopowm1(WuOf(x))
 end
 
 ExponentMinOf(x::Format) = (BitwidthOf(x) < ExpMIF64 ? 1 : Large1) - ExponentBiasOf(x)
